@@ -1,6 +1,25 @@
 import api from './client';
 import type { Store, StoreItem, StoreDiscount } from '../types';
 
+// Categories & Cities
+export const getCategories = () => api.get<Category[]>('/api/categories');
+export const getCities = () => api.get<City[]>('/api/cities');
+
+export interface Category {
+  slug: string;
+  name: string;
+  emoji: string;
+  gradient: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface City {
+  slug: string;
+  name: string;
+  state: string;
+}
+
 // Store
 export const getMyStore = () => api.get<Store>('/api/store/me');
 export const registerStore = (data: object) => api.post<Store>('/api/store/register', data);

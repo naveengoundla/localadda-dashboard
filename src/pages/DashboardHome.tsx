@@ -34,7 +34,7 @@ export default function DashboardHome() {
         <div>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 2 }}>Your store is live at</span>
           <span style={{ fontSize: 13, color: '#f5a623', fontFamily: 'monospace' }}>
-            localadda.com/{store.city.slug}/{store.category}/{store.slug}
+            localadda.com/{store.city.slug}/{typeof store.category === 'object' ? (store.category as any).slug : store.category}/{store.slug}
           </span>
         </div>
         <a href={`http://localhost:8081/api/cities/${store.city.slug}/stores`} target="_blank" rel="noreferrer">

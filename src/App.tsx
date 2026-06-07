@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
+import RegisterStorePage from './pages/RegisterStorePage';
 import ProductsPage from './pages/ProductsPage';
 import DiscountsPage from './pages/DiscountsPage';
 import PhotosPage from './pages/PhotosPage';
@@ -24,6 +25,7 @@ export default function App() {
           element={<RequireAuth><DashboardLayout /></RequireAuth>}
         >
           <Route index element={<DashboardHome />} />
+          <Route path="register" element={<RegisterStorePage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="discounts" element={<DiscountsPage />} />
           <Route path="photos" element={<PhotosPage />} />
