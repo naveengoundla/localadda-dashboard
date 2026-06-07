@@ -29,17 +29,33 @@ export default function DashboardHome() {
 
   return (
     <div style={styles.page}>
-      {/* Live store link */}
-      <div style={styles.previewBar}>
+      {/* Store status bar */}
+      <div style={{ ...styles.previewBar, background: store.status === 'ACTIVE' ? 'linear-gradient(135deg, #0f3460, #1a1a2e)' : store.status === 'PENDING' ? 'linear-gradient(135deg,#92400e,#78350f)' : 'linear-gradient(135deg,#7f1d1d,#450a0a)' }}>
         <div>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 2 }}>Your store is live at</span>
-          <span style={{ fontSize: 13, color: '#f5a623', fontFamily: 'monospace' }}>
-            localadda.com/{store.city.slug}/{typeof store.category === 'object' ? (store.category as any).slug : store.category}/{store.slug}
-          </span>
+          {store.status === 'ACTIVE' ? (
+            <>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 2 }}>Your store is live at</span>
+              <span style={{ fontSize: 13, color: '#f5a623', fontFamily: 'monospace' }}>
+                localadda.com/{store.city.slug}/{store.category.slug}/{store.slug}
+              </span>
+            </>
+          ) : store.status === 'PENDING' ? (
+            <>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 2 }}>⏳ Awaiting admin approval</span>
+              <span style={{ fontSize: 13, color: '#fcd34d' }}>Your store will go live once approved. You can still add products and photos now.</span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 2 }}>🚫 Store {store.status.toLowerCase()}</span>
+              <span style={{ fontSize: 13, color: '#fca5a5' }}>Contact support at admin@localadda.com</span>
+            </>
+          )}
         </div>
-        <a href={`http://localhost:8081/api/cities/${store.city.slug}/stores`} target="_blank" rel="noreferrer">
-          <button style={styles.previewBtn}>👁 View Store</button>
-        </a>
+        {store.status === 'ACTIVE' && (
+          <a href={`https://localadda.com/${store.city.slug}/${store.category.slug}/${store.slug}`} target="_blank" rel="noreferrer">
+            <button style={styles.previewBtn}>👁 View Store</button>
+          </a>
+        )}
       </div>
 
       {/* Header */}
@@ -59,7 +75,7 @@ export default function DashboardHome() {
           { icon: '📦', label: 'Products Listed', value: store.items.length, hint: store.items.length < 5 ? 'Add more to rank higher' : 'Good listing!' },
           { icon: '🎉', label: 'Active Discount', value: activeDiscount ? '1' : '0', hint: activeDiscount ? activeDiscount.valueLabel || 'Active' : 'No discount set' },
           { icon: '🖼️', label: 'Photos', value: (store.galleryUrls?.length || 0) + (store.bannerUrl ? 1 : 0), hint: 'Banner + gallery' },
-          { icon: '✅', label: 'Store Status', value: store.isActive ? 'Live' : 'Hidden', hint: store.isActive ? 'Visible to customers' : 'Not visible' },
+          { icon: store.status === 'ACTIVE' ? '✅' : '⏳', label: 'Store Status', value: store.status === 'ACTIVE' ? 'Live' : store.status === 'PENDING' ? 'Pending' : store.status, hint: store.status === 'ACTIVE' ? 'Visible to customers' : store.status === 'PENDING' ? 'Awaiting approval' : 'Not visible' },
         ].map(({ icon, label, value, hint }) => (
           <div key={label} className="card" style={styles.statCard}>
             <div style={{ fontSize: 28, float: 'right' }}>{icon}</div>

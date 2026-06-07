@@ -5,6 +5,12 @@ export interface City {
   state: string;
 }
 
+export interface Category {
+  slug: string;
+  name: string;
+  emoji: string;
+}
+
 export interface StoreItem {
   id: string;
   name: string;
@@ -29,7 +35,8 @@ export interface Store {
   id: string;
   slug: string;
   name: string;
-  category: string;
+  status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+  category: Category;
   description: string | null;
   phone: string | null;
   address: string | null;
