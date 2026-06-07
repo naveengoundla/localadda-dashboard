@@ -15,7 +15,7 @@ export default function DashboardHome() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={styles.page}><p style={{ color: '#999' }}>Loading…</p></div>;
+  if (loading) return <div className="page-pad" style={styles.page}><p style={{ color: '#999' }}>Loading…</p></div>;
   if (error || !store) return (
     <div style={styles.page}>
       <div className="card" style={{ textAlign: 'center', padding: 40 }}>
@@ -28,7 +28,7 @@ export default function DashboardHome() {
   const activeDiscount = store.discounts.find(d => d.isActive);
 
   return (
-    <div style={styles.page}>
+    <div className="page-pad" style={styles.page}>
       {/* Store status bar */}
       <div style={{ ...styles.previewBar, background: store.status === 'ACTIVE' ? 'linear-gradient(135deg, #0f3460, #1a1a2e)' : store.status === 'PENDING' ? 'linear-gradient(135deg,#92400e,#78350f)' : 'linear-gradient(135deg,#7f1d1d,#450a0a)' }}>
         <div>
@@ -70,7 +70,7 @@ export default function DashboardHome() {
       </div>
 
       {/* Stats */}
-      <div style={styles.statsRow}>
+      <div className="stats-grid" style={styles.statsRow}>
         {[
           { icon: '📦', label: 'Products Listed', value: store.items.length, hint: store.items.length < 5 ? 'Add more to rank higher' : 'Good listing!' },
           { icon: '🎉', label: 'Active Discount', value: activeDiscount ? '1' : '0', hint: activeDiscount ? activeDiscount.valueLabel || 'Active' : 'No discount set' },
@@ -128,7 +128,7 @@ const styles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   title: { fontSize: 26, fontWeight: 900 },
   sub: { fontSize: 14, color: '#888', marginTop: 2 },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 } as React.CSSProperties,
   statCard: { overflow: 'hidden', position: 'relative' },
   cardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   itemRow: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', borderBottom: '1px solid #f5f5f5' },

@@ -58,10 +58,10 @@ export default function RegisterStorePage() {
 
   const selectedCategory = categories.find(c => c.slug === form.categorySlug);
 
-  if (loading) return <div style={styles.page}><p style={{ color: '#999' }}>Loading…</p></div>;
+  if (loading) return <div className="page-pad" style={styles.page}><p style={{ color: '#999' }}>Loading…</p></div>;
 
   return (
-    <div style={styles.page}>
+    <div className="page-pad" style={styles.page}>
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Register Your Store</h1>

@@ -31,7 +31,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 700, margin: '0 auto' }}>
+    <div className="page-pad" style={{ padding: 32, maxWidth: 700, margin: '0 auto' }}>
       <h1 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>📍 Contact & Hours</h1>
       <p style={{ color: '#888', fontSize: 14, marginBottom: 24 }}>This info shows on your store page so customers can reach you.</p>
 

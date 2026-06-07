@@ -52,10 +52,10 @@ export default function PhotosPage() {
     e.target.value = '';
   }
 
-  if (!store) return <div style={{ padding: 32 }}><p style={{ color: '#999' }}>Loading…</p></div>;
+  if (!store) return <div className="page-pad" style={{ padding: 32 }}><p style={{ color: '#999' }}>Loading…</p></div>;
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+    <div className="page-pad" style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
       <h1 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>📸 Photos</h1>
       <p style={{ color: '#888', fontSize: 14, marginBottom: 24 }}>Banner appears at the top of your store page. Gallery shows below your products.</p>
 

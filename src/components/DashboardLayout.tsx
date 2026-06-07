@@ -1,11 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 const NAV = [
-  { to: '/dashboard', label: 'Dashboard', icon: '📊', end: true },
+  { to: '/dashboard', label: 'Home', icon: '📊', end: true },
   { to: '/dashboard/products', label: 'Products', icon: '📦' },
   { to: '/dashboard/discounts', label: 'Discounts', icon: '🎉' },
   { to: '/dashboard/photos', label: 'Photos', icon: '📸' },
-  { to: '/dashboard/contact', label: 'Contact & Hours', icon: '📍' },
+  { to: '/dashboard/contact', label: 'Contact', icon: '📍' },
 ];
 
 export default function DashboardLayout() {
@@ -18,9 +18,9 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div style={styles.shell}>
-      {/* Sidebar */}
-      <aside style={styles.sidebar}>
+    <div className="dashboard-shell" style={styles.shell}>
+      {/* Sidebar — hidden on mobile */}
+      <aside className="dashboard-sidebar" style={styles.sidebar}>
         <div style={styles.logo}>Local<span style={{ color: '#f5a623' }}>Adda</span></div>
 
         <nav style={styles.nav}>
@@ -48,9 +48,26 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <main style={styles.main}>
+      <main className="dashboard-main" style={styles.main}>
         <Outlet />
       </main>
+
+      {/* Bottom nav — mobile only */}
+      <nav className="mobile-bottom-nav" style={styles.bottomNav}>
+        {NAV.map(({ to, label, icon, end }) => (
+          <NavLink
+            key={to} to={to} end={end}
+            style={({ isActive }) => ({ ...styles.bottomItem, ...(isActive ? styles.bottomItemActive : {}) })}
+          >
+            <span style={{ fontSize: 22 }}>{icon}</span>
+            <span style={{ fontSize: 10, marginTop: 2 }}>{label}</span>
+          </NavLink>
+        ))}
+        <button onClick={logout} style={styles.bottomLogout}>
+          <span style={{ fontSize: 22 }}>🚪</span>
+          <span style={{ fontSize: 10, marginTop: 2 }}>Logout</span>
+        </button>
+      </nav>
     </div>
   );
 }
@@ -66,4 +83,10 @@ const styles: Record<string, React.CSSProperties> = {
   userRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
   avatar: { width: 36, height: 36, borderRadius: 10, background: '#e8401c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 },
   logoutBtn: { background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.6)', borderRadius: 8, padding: '8px 14px', fontSize: 13, width: '100%' },
+  main: { flex: 1, minWidth: 0 },
+  // Bottom nav (shown via CSS media query only)
+  bottomNav: { display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1a1a2e', borderTop: '1px solid rgba(255,255,255,0.1)', zIndex: 100, padding: '6px 0 8px' },
+  bottomItem: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', padding: '4px 0' },
+  bottomItemActive: { color: '#f5a623' },
+  bottomLogout: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', padding: '4px 0', fontSize: 'inherit' },
 };

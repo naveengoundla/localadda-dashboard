@@ -59,10 +59,10 @@ export default function ProductsPage() {
     } catch { setMsg('❌ Failed to delete'); }
   }
 
-  if (loading) return <div style={{ padding: 32 }}><p style={{ color: '#999' }}>Loading…</p></div>;
+  if (loading) return <div className="page-pad" style={{ padding: 32 }}><p style={{ color: '#999' }}>Loading…</p></div>;
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+    <div className="page-pad" style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
       <h1 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>📦 Products</h1>
       <p style={{ color: '#888', fontSize: 14, marginBottom: 24 }}>Add the items you sell with prices. Customers see these on your store page.</p>
 

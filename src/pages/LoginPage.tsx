@@ -89,7 +89,7 @@ export default function LoginPage() {
   return (
     <div style={styles.page}>
       {/* Left — form */}
-      <div style={styles.left}>
+      <div className="login-left" style={styles.left}>
         <div style={styles.card}>
           <div style={styles.logo}>Local<span style={{ color: '#f5a623' }}>Adda</span></div>
           <div style={styles.tagline}>Store Owner Portal</div>
@@ -161,7 +161,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right — marketing */}
-      <div style={styles.right}>
+      <div className="login-right" style={styles.right}>
         <h2 style={styles.heroTitle}>Grow your local<br />business with <em style={{ color: '#f5a623', fontStyle: 'normal' }}>LocalAdda</em></h2>
         <p style={styles.heroSub}>Thousands of customers in your city discover stores like yours every day.</p>
         <ul style={styles.featureList}>
