@@ -8,16 +8,25 @@ import ProductsPage from './pages/ProductsPage';
 import DiscountsPage from './pages/DiscountsPage';
 import PhotosPage from './pages/PhotosPage';
 import ContactPage from './pages/ContactPage';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminStoresPage from './pages/admin/AdminStoresPage';
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/login" replace />;
 }
 
+function RequireAdminAuth({ children }: { children: React.ReactElement }) {
+  const token = localStorage.getItem('adminToken');
+  return token ? children : <Navigate to="/admin/login" replace />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Store owner */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route
@@ -31,6 +40,17 @@ export default function App() {
           <Route path="photos" element={<PhotosPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
+
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin"
+          element={<RequireAdminAuth><AdminLayout /></RequireAdminAuth>}
+        >
+          <Route index element={<Navigate to="/admin/stores" replace />} />
+          <Route path="stores" element={<AdminStoresPage />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
