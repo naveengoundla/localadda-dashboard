@@ -5,14 +5,34 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Decode JWT payload and check if it's expired (client-side, no crypto needed)
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // exp is in seconds, Date.now() is in ms
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true; // malformed token → treat as expired
+  }
+}
+
 // Attach the right JWT — admin routes use adminToken, everything else uses token
+// Clears token and redirects before making the request if already expired
 api.interceptors.request.use((config) => {
   const url = config.url || '';
   const isAdminRoute = url.startsWith('/api/admin');
-  const token = isAdminRoute
-    ? localStorage.getItem('adminToken')
-    : localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const storageKey = isAdminRoute ? 'adminToken' : 'token';
+  const loginPath = isAdminRoute ? '/admin/login' : '/login';
+  const token = localStorage.getItem(storageKey);
+
+  if (token) {
+    if (isTokenExpired(token)) {
+      localStorage.removeItem(storageKey);
+      window.location.href = loginPath;
+      return Promise.reject(new Error('Session expired. Please log in again.'));
+    }
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
