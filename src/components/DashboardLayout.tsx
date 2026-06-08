@@ -1,4 +1,31 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    // Already running as installed PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setInstalled(true);
+      return;
+    }
+    const handler = (e: Event) => { e.preventDefault(); setPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  async function install() {
+    if (!prompt) return;
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === 'accepted') setInstalled(true);
+    setPrompt(null);
+  }
+
+  return { canInstall: !!prompt && !installed, install };
+}
 
 const NAV = [
   { to: '/dashboard', label: 'Home', icon: '📊', end: true },
@@ -11,6 +38,7 @@ const NAV = [
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const phone = localStorage.getItem('phone') || '';
+  const { canInstall, install } = useInstallPrompt();
 
   function logout() {
     localStorage.clear();
@@ -49,6 +77,15 @@ export default function DashboardLayout() {
 
       {/* Main content */}
       <main className="dashboard-main" style={styles.main}>
+        {/* Install PWA banner — shown only when browser supports it and not yet installed */}
+        {canInstall && (
+          <div style={styles.installBanner}>
+            <span style={{ fontSize: 20 }}>📲</span>
+            <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>Install LocalAdda on your phone for quick access</span>
+            <button onClick={install} style={styles.installBtn}>Install</button>
+            <button onClick={() => {}} style={styles.installDismiss}>✕</button>
+          </div>
+        )}
         <Outlet />
       </main>
 
@@ -84,6 +121,9 @@ const styles: Record<string, React.CSSProperties> = {
   avatar: { width: 36, height: 36, borderRadius: 10, background: '#e8401c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 },
   logoutBtn: { background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.6)', borderRadius: 8, padding: '8px 14px', fontSize: 13, width: '100%' },
   main: { flex: 1, minWidth: 0 },
+  installBanner: { display: 'flex', alignItems: 'center', gap: 10, background: '#1a1a2e', color: '#fff', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)' },
+  installBtn: { background: '#e8401c', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const },
+  installDismiss: { background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 16, padding: '4px 8px' },
   // Bottom nav (shown via CSS media query only)
   bottomNav: { display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1a1a2e', borderTop: '1px solid rgba(255,255,255,0.1)', zIndex: 100, padding: '6px 0 8px' },
   bottomItem: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', padding: '4px 0' },
