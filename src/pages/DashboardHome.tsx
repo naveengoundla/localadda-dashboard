@@ -31,29 +31,29 @@ export default function DashboardHome() {
     <div className="page-pad" style={styles.page}>
       {/* Store status bar */}
       <div style={{ ...styles.previewBar, background: store.status === 'ACTIVE' ? 'linear-gradient(135deg, #0f3460, #1a1a2e)' : store.status === 'PENDING' ? 'linear-gradient(135deg,#92400e,#78350f)' : 'linear-gradient(135deg,#7f1d1d,#450a0a)' }}>
-        <div>
+        <div style={styles.previewBarText}>
           {store.status === 'ACTIVE' ? (
             <>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 2 }}>Your store is live at</span>
-              <span style={{ fontSize: 13, color: '#f5a623', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 2 }}>Your store is live at</span>
+              <span style={styles.previewUrl}>
                 localadda.com/{store.city.slug}/{store.category.slug}/{store.slug}
               </span>
             </>
           ) : store.status === 'PENDING' ? (
             <>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 2 }}>⏳ Awaiting admin approval</span>
-              <span style={{ fontSize: 13, color: '#fcd34d' }}>Your store will go live once approved. You can still add products and photos now.</span>
+              <span style={{ fontSize: 12, color: '#fcd34d' }}>Your store will go live once approved.</span>
             </>
           ) : (
             <>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 2 }}>🚫 Store {store.status.toLowerCase()}</span>
-              <span style={{ fontSize: 13, color: '#fca5a5' }}>Contact support at admin@localadda.com</span>
+              <span style={{ fontSize: 12, color: '#fca5a5' }}>Contact support at admin@localadda.com</span>
             </>
           )}
         </div>
         {store.status === 'ACTIVE' && (
           <a href={`https://localadda.com/${store.city.slug}/${store.category.slug}/${store.slug}`} target="_blank" rel="noreferrer">
-            <button style={styles.previewBtn}>👁 View Store</button>
+            <button style={styles.previewBtn}>👁 View</button>
           </a>
         )}
       </div>
@@ -123,14 +123,16 @@ export default function DashboardHome() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: { padding: 32, maxWidth: 900, margin: '0 auto' },
-  previewBar: { background: 'linear-gradient(135deg, #0f3460, #1a1a2e)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  previewBtn: { background: '#e8401c', color: '#fff', border: 'none', padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700 },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  title: { fontSize: 26, fontWeight: 900 },
-  sub: { fontSize: 14, color: '#888', marginTop: 2 },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 } as React.CSSProperties,
+  previewBar: { background: 'linear-gradient(135deg, #0f3460, #1a1a2e)', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 24, minWidth: 0 },
+  previewBarText: { minWidth: 0, flex: 1, overflow: 'hidden' },
+  previewUrl: { fontSize: 12, color: '#f5a623', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'block' },
+  previewBtn: { background: '#e8401c', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 700, flexShrink: 0, cursor: 'pointer', whiteSpace: 'nowrap' as const },
+  header: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 24 },
+  title: { fontSize: 22, fontWeight: 900 },
+  sub: { fontSize: 13, color: '#888', marginTop: 2 },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 16 } as React.CSSProperties,
   statCard: { overflow: 'hidden', position: 'relative' },
   cardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   itemRow: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', borderBottom: '1px solid #f5f5f5' },
-  discountBanner: { background: 'linear-gradient(135deg, #e8401c, #f5a623)', borderRadius: 14, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#fff', gap: 16 },
+  discountBanner: { background: 'linear-gradient(135deg, #e8401c, #f5a623)', borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#fff', gap: 16, flexWrap: 'wrap' as const },
 };
