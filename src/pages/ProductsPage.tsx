@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { getMyStore, addItem, updateItem, deleteItem, getItemImagePresign } from '../api/store';
 import type { Store, StoreItem } from '../types';
+import { compressImage } from '../lib/compressImage';
 
 type Form = { name: string; price: string; unit: string; isFeatured: boolean; imageUrl: string };
 const EMPTY: Form = { name: '', price: '', unit: '', isFeatured: false, imageUrl: '' };
@@ -39,12 +40,13 @@ export default function ProductsPage() {
       return;
     }
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     setUploading(true); setMsg('');
     try {
+      // Compress client-side (max 1200px for product shots) before R2 upload
+      const { blob, ext, contentType } = await compressImage(file, 1200);
       const { data } = await getItemImagePresign(editId, ext);
-      await axios.put(data.uploadUrl, file, {
-        headers: { 'Content-Type': file.type, 'Cache-Control': 'public, max-age=31536000' },
+      await axios.put(data.uploadUrl, blob, {
+        headers: { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=31536000' },
       });
       setForm(f => ({ ...f, imageUrl: data.publicUrl }));
       setMsg('✅ Photo uploaded — click Update Product to save.');

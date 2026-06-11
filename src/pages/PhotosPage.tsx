@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getMyStore, updateBanner, addGalleryPhoto, getBannerPresign, getGalleryPresign } from '../api/store';
 import type { Store } from '../types';
 import axios from 'axios';
+import { compressImage } from '../lib/compressImage';
 
 export default function PhotosPage() {
   const [store, setStore] = useState<Store | null>(null);
@@ -15,21 +16,23 @@ export default function PhotosPage() {
   }, []);
 
   async function uploadFile(file: File, type: 'banner' | 'gallery') {
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     setUploading(type); setMsg('');
     try {
-      // 1. Get presigned URL
+      // 1. Compress client-side (max 1600px, JPEG) so phone photos don't land in R2 raw
+      const { blob, ext, contentType } = await compressImage(file, 1600);
+
+      // 2. Get presigned URL
       const presignRes = type === 'banner'
         ? await getBannerPresign(ext)
         : await getGalleryPresign(ext);
       const { uploadUrl, publicUrl } = presignRes.data;
 
-      // 2. Upload directly to R2
-      await axios.put(uploadUrl, file, {
-        headers: { 'Content-Type': file.type, 'Cache-Control': 'public, max-age=31536000' },
+      // 3. Upload directly to R2
+      await axios.put(uploadUrl, blob, {
+        headers: { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=31536000' },
       });
 
-      // 3. Save URL to store
+      // 4. Save URL to store
       if (type === 'banner') {
         const res = await updateBanner(publicUrl);
         setStore(res.data);
