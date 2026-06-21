@@ -18,6 +18,7 @@ export interface Category {
   emoji: string;
   itemSchema?: CategoryField[];
   layout?: 'list' | 'grid' | 'menu';
+  groupBy?: string | null;
 }
 
 export interface StoreItem {

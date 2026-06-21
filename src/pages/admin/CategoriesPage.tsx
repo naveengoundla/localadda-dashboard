@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAdminCategories, updateCategorySchema, updateCategoryLayout } from '../../api/admin';
+import { getAdminCategories, updateCategorySchema, updateCategoryLayout, updateCategoryGrouping } from '../../api/admin';
 import type { Category, CategoryField } from '../../types';
 import AttributeFields from '../../components/AttributeFields';
 
@@ -48,6 +48,17 @@ export default function CategoriesPage() {
       setMsg('✅ Layout updated for ' + (current.name) + ' stores.');
     } catch (e: any) {
       setErr(e?.response?.data?.error || 'Could not update layout.');
+    }
+  }
+
+  async function setGrouping(next: string) {
+    if (!current) return;
+    try {
+      const r = await updateCategoryGrouping(slug, next);
+      setCats(cs => cs.map(c => c.slug === slug ? { ...c, groupBy: r.data.groupBy } : c));
+      setMsg(next ? '✅ Items now group by "' + next + '".' : '✅ Grouping turned off.');
+    } catch (e: any) {
+      setErr(e?.response?.data?.error || 'Could not update grouping.');
     }
   }
 
@@ -174,6 +185,24 @@ export default function CategoriesPage() {
               </button>
             );
           })}
+        </div>
+
+        {/* Group items by */}
+        <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #f0f0f0' }}>
+          <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 6 }}>Group items into sections</div>
+          <select
+            value={current?.groupBy || ''}
+            onChange={e => setGrouping(e.target.value)}
+            style={{ width: '100%', maxWidth: 320, padding: '9px 12px', borderRadius: 9, border: '1.5px solid #e0e0e0', fontSize: 14, background: '#fff' }}
+          >
+            <option value="">No sections (flat list)</option>
+            {(current?.itemSchema || []).map(f => (
+              <option key={f.key} value={f.key}>Group by “{f.label}”</option>
+            ))}
+          </select>
+          <p style={{ fontSize: 11.5, color: '#aaa', marginTop: 6 }}>
+            Big catalogs read better in sections — e.g. grocery by aisle, restaurant by course. Pick a field above (save the field first if it's new).
+          </p>
         </div>
       </div>
 

@@ -7,6 +7,8 @@ export const updateCategorySchema = (slug: string, schema: CategoryField[]) =>
   api.put<Category>(`/api/admin/categories/${slug}/schema`, schema);
 export const updateCategoryLayout = (slug: string, layout: string) =>
   api.put<Category>(`/api/admin/categories/${slug}/layout`, { layout });
+export const updateCategoryGrouping = (slug: string, groupBy: string) =>
+  api.put<Category>(`/api/admin/categories/${slug}/grouping`, { groupBy });
 
 export interface AdminStore {
   id: string;
