@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAdminCategories, updateCategorySchema } from '../../api/admin';
+import { getAdminCategories, updateCategorySchema, updateCategoryLayout } from '../../api/admin';
 import type { Category, CategoryField } from '../../types';
 import AttributeFields from '../../components/AttributeFields';
 
@@ -39,6 +39,17 @@ export default function CategoriesPage() {
   }
 
   const current = cats.find(c => c.slug === slug);
+
+  async function setLayout(next: string) {
+    if (!current || current.layout === next) return;
+    try {
+      const r = await updateCategoryLayout(slug, next);
+      setCats(cs => cs.map(c => c.slug === slug ? { ...c, layout: r.data.layout } : c));
+      setMsg('✅ Layout updated for ' + (current.name) + ' stores.');
+    } catch (e: any) {
+      setErr(e?.response?.data?.error || 'Could not update layout.');
+    }
+  }
 
   function patch(i: number, p: Partial<CategoryField>) {
     setFields(fs => fs.map((f, idx) => {
@@ -140,6 +151,30 @@ export default function CategoriesPage() {
 
       {err && <p style={{ color: '#e8401c', fontSize: 13, marginBottom: 12, fontWeight: 600 }}>⚠️ {err}</p>}
       {msg && <p style={{ color: '#1a7a35', fontSize: 13, marginBottom: 12, fontWeight: 600 }}>{msg}</p>}
+
+      {/* Layout mode */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>🧱 Store-page layout</div>
+        <p style={{ fontSize: 12.5, color: '#999', marginBottom: 12 }}>How items show on a {current?.name || 'category'} store page.</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {[
+            { v: 'list', label: '☰ List', hint: 'price-list rows — grocery, pharmacy, hardware' },
+            { v: 'grid', label: '▦ Grid', hint: 'image-forward cards — clothing, optical' },
+          ].map(opt => {
+            const on = (current?.layout || 'list') === opt.v;
+            return (
+              <button key={opt.v} onClick={() => setLayout(opt.v)} title={opt.hint}
+                style={{
+                  flex: '1 1 200px', textAlign: 'left', padding: '10px 14px', borderRadius: 10, cursor: 'pointer',
+                  border: on ? '2px solid #17a44b' : '1.5px solid #e6e6e6', background: on ? '#edfbf1' : '#fff',
+                }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: on ? '#17a44b' : '#333' }}>{opt.label}{on ? ' ✓' : ''}</div>
+                <div style={{ fontSize: 11.5, color: '#999', marginTop: 2 }}>{opt.hint}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
         {/* Editor */}

@@ -5,6 +5,8 @@ import type { Category, CategoryField } from '../types';
 export const getAdminCategories = () => api.get<Category[]>('/api/admin/categories');
 export const updateCategorySchema = (slug: string, schema: CategoryField[]) =>
   api.put<Category>(`/api/admin/categories/${slug}/schema`, schema);
+export const updateCategoryLayout = (slug: string, layout: string) =>
+  api.put<Category>(`/api/admin/categories/${slug}/layout`, { layout });
 
 export interface AdminStore {
   id: string;

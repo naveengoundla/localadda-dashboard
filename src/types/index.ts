@@ -17,6 +17,7 @@ export interface Category {
   name: string;
   emoji: string;
   itemSchema?: CategoryField[];
+  layout?: 'list' | 'grid' | 'menu';
 }
 
 export interface StoreItem {
