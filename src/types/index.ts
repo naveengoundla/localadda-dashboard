@@ -26,6 +26,7 @@ export interface StoreItem {
   id: string;
   name: string;
   price: number;
+  mrp?: number | null;
   unit: string | null;
   imageUrl: string | null;
   isFeatured: boolean;

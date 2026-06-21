@@ -6,8 +6,8 @@ import { compressImage } from '../lib/compressImage';
 import AttributeFields from '../components/AttributeFields';
 
 type Attrs = Record<string, unknown>;
-type Form = { name: string; price: string; unit: string; isFeatured: boolean; imageUrl: string; attributes: Attrs };
-const EMPTY: Form = { name: '', price: '', unit: '', isFeatured: false, imageUrl: '', attributes: {} };
+type Form = { name: string; price: string; mrp: string; unit: string; isFeatured: boolean; imageUrl: string; attributes: Attrs };
+const EMPTY: Form = { name: '', price: '', mrp: '', unit: '', isFeatured: false, imageUrl: '', attributes: {} };
 
 export default function ProductsPage() {
   const [store, setStore] = useState<Store | null>(null);
@@ -26,7 +26,7 @@ export default function ProductsPage() {
 
   function startEdit(item: StoreItem) {
     setEditId(item.id);
-    setForm({ name: item.name, price: String(item.price), unit: item.unit || '', isFeatured: item.isFeatured, imageUrl: item.imageUrl || '', attributes: (item.attributes as Attrs) || {} });
+    setForm({ name: item.name, price: String(item.price), mrp: item.mrp != null ? String(item.mrp) : '', unit: item.unit || '', isFeatured: item.isFeatured, imageUrl: item.imageUrl || '', attributes: (item.attributes as Attrs) || {} });
   }
 
   function cancelEdit() { setEditId(null); setForm(EMPTY); }
@@ -67,6 +67,7 @@ export default function ProductsPage() {
       const payload = {
         name: form.name,
         price: parseFloat(form.price),
+        mrp: form.mrp ? parseFloat(form.mrp) : null,
         unit: form.unit || null,
         isFeatured: form.isFeatured,
         imageUrl: form.imageUrl || null,
@@ -122,6 +123,11 @@ export default function ProductsPage() {
               <label className="label">Price (₹) *</label>
               <input className="input" type="number" placeholder="30" value={form.price}
                 onChange={e => setForm(f => ({ ...f, price: e.target.value }))} min="0" step="0.5" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label className="label">MRP (₹)</label>
+              <input className="input" type="number" placeholder="optional" value={form.mrp}
+                onChange={e => setForm(f => ({ ...f, mrp: e.target.value }))} min="0" step="0.5" />
             </div>
             <div style={{ flex: 1 }}>
               <label className="label">Unit</label>
@@ -238,7 +244,12 @@ export default function ProductsPage() {
                 {item.isFeatured && <span className="badge badge-orange" style={{ marginLeft: 8 }}>Featured</span>}
                 {item.unit && <span style={{ fontSize: 12, color: '#999', marginLeft: 6 }}>/ {item.unit}</span>}
               </div>
-              <span style={{ fontWeight: 900, fontSize: 16, color: '#e8401c', marginRight: 16 }}>₹{item.price}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, marginRight: 16 }}>
+                <span style={{ fontWeight: 900, fontSize: 16, color: '#e8401c' }}>₹{item.price}</span>
+                {item.mrp != null && Number(item.mrp) > Number(item.price) && (
+                  <span style={{ fontSize: 12, color: '#aaa', textDecoration: 'line-through' }}>₹{item.mrp}</span>
+                )}
+              </span>
               <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, marginRight: 6 }} onClick={() => startEdit(item)}>✏️ Edit</button>
               <button className="btn-danger" style={{ padding: '6px 12px' }} onClick={() => handleDelete(item.id)}>🗑️</button>
             </div>
