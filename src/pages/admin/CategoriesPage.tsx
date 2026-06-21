@@ -160,6 +160,7 @@ export default function CategoriesPage() {
           {[
             { v: 'list', label: '☰ List', hint: 'price-list rows — grocery, pharmacy, hardware' },
             { v: 'grid', label: '▦ Grid', hint: 'image-forward cards — clothing, optical' },
+            { v: 'menu', label: '🍽 Menu', hint: 'grouped by section — restaurants (needs a "course" field)' },
           ].map(opt => {
             const on = (current?.layout || 'list') === opt.v;
             return (
