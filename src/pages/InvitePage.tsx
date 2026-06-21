@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMyStore, listInvites, createInvite } from '../api/store';
 import type { Store, OwnerInvite } from '../types';
+import { generateInviteCard } from '../lib/inviteCard';
 
 const PUBLIC_BASE = import.meta.env.VITE_PUBLIC_URL || 'https://localadda-public-production.up.railway.app';
 
@@ -68,6 +69,58 @@ export default function InvitePage() {
     window.open(buildWaLink(inv.phone, inv.code), '_blank');
   }
 
+  async function shareCard(code: string) {
+    if (!store) return;
+    setMsg('');
+    try {
+      const blob = await generateInviteCard({
+        storeName: store.name,
+        locality: `${store.category.name} · ${store.city.name}`,
+        code,
+        url: storeUrl,
+      });
+      const file = new File([blob], `localadda-invite-${code}.png`, { type: 'image/png' });
+      const caption = `Your preorder invite for ${store.name} — code ${code}. Open: ${storeUrl}`;
+
+      // Mobile: native share sheet attaches the image; owner picks the WhatsApp contact
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: caption });
+        setMsg('✅ Shared — pick the customer in WhatsApp and send.');
+      } else {
+        // Desktop fallback: download the card + open WhatsApp chat with a text caption
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setMsg('✅ Card downloaded — attach it in WhatsApp to send.');
+      }
+    } catch (e: any) {
+      if (e?.name === 'AbortError') return; // user dismissed the share sheet
+      setMsg('❌ Could not generate the card.');
+    }
+  }
+
+  async function sendNewCard() {
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length !== 10) { setMsg('⚠️ Enter a valid 10-digit number.'); return; }
+    setBusy(true); setMsg('');
+    try {
+      const { data } = await createInvite(clean);
+      setQuota({ quota: data.quota, used: data.used, remaining: data.remaining });
+      setInvites((prev) => [
+        { code: data.code, phone: clean, redeemed: false, createdAt: new Date().toISOString() },
+        ...prev,
+      ]);
+      setPhone('');
+      await shareCard(data.code);
+    } catch (e: any) {
+      setMsg('❌ ' + (e?.response?.data?.error || 'Could not create invite.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (loading) return <div style={{ padding: 32 }}><p style={{ color: '#999' }}>Loading…</p></div>;
 
   const notEnabled = !store?.orderingEnabled || quota.quota === 0;
@@ -123,14 +176,29 @@ export default function InvitePage() {
                 onClick={handleSend}
                 disabled={busy || quota.remaining <= 0}
                 style={{
-                  padding: '11px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  padding: '11px 18px', borderRadius: 10, border: 'none', cursor: 'pointer',
                   background: quota.remaining <= 0 ? '#ccc' : 'linear-gradient(135deg,#1db954,#17a44b)',
                   color: '#fff', fontWeight: 800, fontSize: 14, whiteSpace: 'nowrap',
                 }}
               >
-                {busy ? 'Opening…' : '💬 Send on WhatsApp'}
+                {busy ? '…' : '💬 Send text'}
+              </button>
+              <button
+                onClick={sendNewCard}
+                disabled={busy || quota.remaining <= 0}
+                style={{
+                  padding: '11px 18px', borderRadius: 10, cursor: 'pointer',
+                  background: '#fff', border: '1.5px solid #17a44b',
+                  color: '#17a44b', fontWeight: 800, fontSize: 14, whiteSpace: 'nowrap',
+                  opacity: quota.remaining <= 0 ? 0.5 : 1,
+                }}
+              >
+                🖼️ Send card
               </button>
             </div>
+            <p style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>
+              Text is one-tap. Card sends the branded image with a QR — on phones it opens your share sheet, on desktop it downloads to attach.
+            </p>
             {quota.remaining <= 0 && (
               <p style={{ fontSize: 12.5, color: '#e8401c', marginTop: 10 }}>
                 You've used all {quota.quota} invites. Contact LocalAdda to add more.
@@ -161,6 +229,10 @@ export default function InvitePage() {
                     ) : (
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#e8901c', background: '#fff4e5', padding: '4px 10px', borderRadius: 20 }}>Pending</span>
                     )}
+                    <button onClick={() => shareCard(inv.code)}
+                      style={{ fontSize: 12.5, fontWeight: 700, color: '#17a44b', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      🖼️ Card
+                    </button>
                     {!inv.redeemed && inv.phone && (
                       <button onClick={() => resend(inv)}
                         style={{ fontSize: 12.5, fontWeight: 700, color: '#1db954', background: 'none', border: 'none', cursor: 'pointer' }}>
