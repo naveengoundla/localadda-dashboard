@@ -247,9 +247,15 @@ export default function CategoriesPage() {
                   </div>
                 )}
 
-                <div style={{ marginTop: 6, fontSize: 11, color: '#aaa' }}>
-                  key: <code style={{ fontFamily: 'monospace', color: frozen ? '#888' : '#1a7a35' }}>{f.key}</code>
-                  {frozen ? ' 🔒 locked' : ' (new — set by label)'}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, flexWrap: 'wrap', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 600, color: '#555', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={!!f.filterable} onChange={e => patch(i, { filterable: e.target.checked })} />
+                    Show as a filter on the store page
+                  </label>
+                  <span style={{ fontSize: 11, color: '#aaa' }}>
+                    key: <code style={{ fontFamily: 'monospace', color: frozen ? '#888' : '#1a7a35' }}>{f.key}</code>
+                    {frozen ? ' 🔒' : ' (new)'}
+                  </span>
                 </div>
               </div>
             );

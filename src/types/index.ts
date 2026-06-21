@@ -10,6 +10,7 @@ export interface CategoryField {
   label: string;
   type: 'text' | 'select' | 'tags' | 'bool';
   options?: string[];
+  filterable?: boolean;
 }
 
 export interface Category {
