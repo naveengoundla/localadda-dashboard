@@ -33,6 +33,7 @@ const NAV = [
   { to: '/dashboard/discounts', label: 'Discounts', icon: '🎉' },
   { to: '/dashboard/photos', label: 'Photos', icon: '📸' },
   { to: '/dashboard/contact', label: 'Contact', icon: '📍' },
+  { to: '/dashboard/invites', label: 'Invites', icon: '🎟️' },
 ];
 
 export default function DashboardLayout() {

@@ -8,6 +8,7 @@ import ProductsPage from './pages/ProductsPage';
 import DiscountsPage from './pages/DiscountsPage';
 import PhotosPage from './pages/PhotosPage';
 import ContactPage from './pages/ContactPage';
+import InvitePage from './pages/InvitePage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminStoresPage from './pages/admin/AdminStoresPage';
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="discounts" element={<DiscountsPage />} />
           <Route path="photos" element={<PhotosPage />} />
           <Route path="contact" element={<ContactPage />} />
+          <Route path="invites" element={<InvitePage />} />
         </Route>
 
         {/* Admin */}

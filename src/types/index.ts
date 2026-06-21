@@ -45,7 +45,22 @@ export interface Store {
   galleryUrls: string[];
   hours: Record<string, string> | null;
   isActive: boolean;
+  orderingEnabled?: boolean;
+  inviteQuota?: number;
   city: City;
   items: StoreItem[];
   discounts: StoreDiscount[];
+}
+
+export interface OwnerInvite {
+  code: string;
+  phone: string | null;
+  redeemed: boolean;
+  createdAt: string;
+}
+
+export interface InviteQuota {
+  quota: number;
+  used: number;
+  remaining: number;
 }

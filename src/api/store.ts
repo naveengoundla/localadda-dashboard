@@ -43,3 +43,10 @@ export const getGalleryPresign = (ext: string) =>
   api.get<{ uploadUrl: string; publicUrl: string }>(`/api/upload/gallery?ext=${ext}`);
 export const getItemImagePresign = (itemId: string, ext: string) =>
   api.get<{ uploadUrl: string; publicUrl: string }>(`/api/upload/item-image?itemId=${itemId}&ext=${ext}`);
+
+// Owner preorder invites
+import type { OwnerInvite, InviteQuota } from '../types';
+export const listInvites = () =>
+  api.get<InviteQuota & { invites: OwnerInvite[] }>('/api/owner/invites');
+export const createInvite = (phone: string) =>
+  api.post<InviteQuota & { code: string; phone: string }>('/api/owner/invites', { phone });
