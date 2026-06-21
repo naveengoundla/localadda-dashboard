@@ -3,9 +3,11 @@ import axios from 'axios';
 import { getMyStore, addItem, updateItem, deleteItem, getItemImagePresign } from '../api/store';
 import type { Store, StoreItem } from '../types';
 import { compressImage } from '../lib/compressImage';
+import AttributeFields from '../components/AttributeFields';
 
-type Form = { name: string; price: string; unit: string; isFeatured: boolean; imageUrl: string };
-const EMPTY: Form = { name: '', price: '', unit: '', isFeatured: false, imageUrl: '' };
+type Attrs = Record<string, unknown>;
+type Form = { name: string; price: string; unit: string; isFeatured: boolean; imageUrl: string; attributes: Attrs };
+const EMPTY: Form = { name: '', price: '', unit: '', isFeatured: false, imageUrl: '', attributes: {} };
 
 export default function ProductsPage() {
   const [store, setStore] = useState<Store | null>(null);
@@ -24,7 +26,7 @@ export default function ProductsPage() {
 
   function startEdit(item: StoreItem) {
     setEditId(item.id);
-    setForm({ name: item.name, price: String(item.price), unit: item.unit || '', isFeatured: item.isFeatured, imageUrl: item.imageUrl || '' });
+    setForm({ name: item.name, price: String(item.price), unit: item.unit || '', isFeatured: item.isFeatured, imageUrl: item.imageUrl || '', attributes: (item.attributes as Attrs) || {} });
   }
 
   function cancelEdit() { setEditId(null); setForm(EMPTY); }
@@ -68,6 +70,7 @@ export default function ProductsPage() {
         unit: form.unit || null,
         isFeatured: form.isFeatured,
         imageUrl: form.imageUrl || null,
+        attributes: form.attributes,
       };
       const res = editId
         ? await updateItem(editId, payload)
@@ -126,6 +129,15 @@ export default function ProductsPage() {
                 onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} />
             </div>
           </div>
+
+          {/* Category-specific fields */}
+          {store?.category?.itemSchema && store.category.itemSchema.length > 0 && (
+            <AttributeFields
+              schema={store.category.itemSchema}
+              value={form.attributes}
+              onChange={(attributes) => setForm(f => ({ ...f, attributes }))}
+            />
+          )}
 
           {/* Photo upload — only when editing */}
           {editId && (
