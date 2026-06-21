@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 const NAV = [
   { to: '/admin/stores', label: 'All Stores', icon: '🏪' },
+  { to: '/admin/categories', label: 'Category Fields', icon: '🧩' },
 ];
 
 const STATUS_TABS = [
