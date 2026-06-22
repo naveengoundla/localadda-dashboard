@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sendOtp, verifyOtp } from '../api/auth';
+import { sendEmailOtp, verifyOtp } from '../api/auth';
 
 type Step = 'phone' | 'otp';
 
@@ -8,6 +8,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,14 +33,18 @@ export default function LoginPage() {
       setError('Enter a valid 10-digit Indian mobile number');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Enter a valid email — we’ll send your code there');
+      return;
+    }
     setLoading(true); setError('');
     try {
-      await sendOtp(phone);
+      await sendEmailOtp(phone, email);
       setStep('otp');
       setResendTimer(60);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send OTP. Try again.');
+      setError(err.response?.data?.error || 'Failed to send code. Try again.');
     } finally {
       setLoading(false);
     }
@@ -78,7 +83,7 @@ export default function LoginPage() {
   async function handleResend() {
     setLoading(true); setError('');
     try {
-      await sendOtp(phone);
+      await sendEmailOtp(phone, email);
       setOtp(['', '', '', '', '', '']);
       setResendTimer(60);
       otpRefs.current[0]?.focus();
@@ -97,9 +102,9 @@ export default function LoginPage() {
           {step === 'phone' ? (
             <form onSubmit={handleSendOtp}>
               <h2 style={styles.title}>Welcome back 👋</h2>
-              <p style={styles.subtitle}>Enter your phone number to receive an OTP</p>
+              <p style={styles.subtitle}>Enter your phone & email — we’ll email you a verification code.</p>
 
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label className="label">Mobile Number</label>
                 <div style={styles.phoneWrap}>
                   <span style={styles.flag}>🇮🇳 +91</span>
@@ -115,16 +120,29 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <div style={{ marginBottom: 20 }}>
+                <label className="label">Email</label>
+                <input
+                  className="input"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  inputMode="email"
+                />
+                <div style={{ fontSize: 11.5, color: '#aaa', marginTop: 5 }}>📧 We’ll email your code (SMS coming soon).</div>
+              </div>
+
               {error && <p className="error-msg">{error}</p>}
               <button className="btn-primary" type="submit" disabled={loading} style={{ marginTop: 16 }}>
-                {loading ? 'Sending…' : 'Send OTP →'}
+                {loading ? 'Sending…' : 'Send code →'}
               </button>
               <p style={styles.hint}>New store owner? <a href="/dashboard/register" style={{ color: '#e8401c' }}>Register your store</a></p>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp}>
-              <h2 style={styles.title}>Enter OTP 🔐</h2>
-              <p style={styles.subtitle}>Sent to +91 {phone} · <button type="button" onClick={() => setStep('phone')} style={styles.changeBtn}>Change</button></p>
+              <h2 style={styles.title}>Enter code 🔐</h2>
+              <p style={styles.subtitle}>Emailed to {email} · <button type="button" onClick={() => setStep('phone')} style={styles.changeBtn}>Change</button></p>
 
               <div style={{ marginBottom: 20 }}>
                 <label className="label">6-Digit OTP</label>
