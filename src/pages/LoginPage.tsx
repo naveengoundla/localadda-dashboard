@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sendEmailOtp, verifyOtp } from '../api/auth';
+import Turnstile, { type TurnstileHandle } from '../components/Turnstile';
 
 type Step = 'phone' | 'otp';
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -39,11 +41,13 @@ export default function LoginPage() {
     }
     setLoading(true); setError('');
     try {
-      await sendEmailOtp(phone, email);
+      await sendEmailOtp(phone, email, turnstileRef.current?.getToken());
+      turnstileRef.current?.reset();
       setStep('otp');
       setResendTimer(60);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch (err: any) {
+      turnstileRef.current?.reset();
       setError(err.response?.data?.error || 'Failed to send code. Try again.');
     } finally {
       setLoading(false);
@@ -83,11 +87,12 @@ export default function LoginPage() {
   async function handleResend() {
     setLoading(true); setError('');
     try {
-      await sendEmailOtp(phone, email);
+      await sendEmailOtp(phone, email, turnstileRef.current?.getToken());
+      turnstileRef.current?.reset();
       setOtp(['', '', '', '', '', '']);
       setResendTimer(60);
       otpRefs.current[0]?.focus();
-    } catch { setError('Failed to resend. Try again.'); }
+    } catch { turnstileRef.current?.reset(); setError('Failed to resend. Try again.'); }
     finally { setLoading(false); }
   }
 
@@ -175,6 +180,9 @@ export default function LoginPage() {
               </p>
             </form>
           )}
+
+          {/* Bot protection — renders only when VITE_TURNSTILE_SITE_KEY is set */}
+          <Turnstile ref={turnstileRef} />
         </div>
       </div>
 
