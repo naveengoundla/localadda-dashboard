@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import api from '../../api/client';
 
 const NAV = [
   { to: '/admin/stores', label: 'All Stores', icon: '🏪' },
@@ -18,6 +19,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   function logout() {
+    api.post('/api/auth/logout').catch(() => {});
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
   }

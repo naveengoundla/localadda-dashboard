@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import api from '../api/client';
 
 function useInstallPrompt() {
   const [prompt, setPrompt] = useState<any>(null);
@@ -42,6 +43,8 @@ export default function DashboardLayout() {
   const { canInstall, install } = useInstallPrompt();
 
   function logout() {
+    // Best-effort server-side revoke of the refresh token, then clear local state.
+    api.post('/api/auth/logout').catch(() => {});
     localStorage.clear();
     navigate('/login');
   }
