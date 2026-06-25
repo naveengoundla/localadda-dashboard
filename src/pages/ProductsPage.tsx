@@ -18,6 +18,9 @@ export default function ProductsPage() {
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState('');
   const imgRef = useRef<HTMLInputElement>(null);
+  // Temp image-folder id for a not-yet-saved product, so a photo can be added
+  // during the initial "Add Product" before the item has a real id.
+  const pendingImgId = useRef<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -29,29 +32,29 @@ export default function ProductsPage() {
     setForm({ name: item.name, price: String(item.price), mrp: item.mrp != null ? String(item.mrp) : '', unit: item.unit || '', isFeatured: item.isFeatured, imageUrl: item.imageUrl || '', attributes: (item.attributes as Attrs) || {} });
   }
 
-  function cancelEdit() { setEditId(null); setForm(EMPTY); }
+  function cancelEdit() { setEditId(null); setForm(EMPTY); pendingImgId.current = null; }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
 
-    // Need a saved item ID to associate the image — if adding new, save first
-    if (!editId) {
-      setMsg('⚠️ Save the product first, then add a photo.');
-      return;
-    }
+    // A new product has no id yet — use a stable temp folder id so the photo can
+    // be uploaded now and linked when the product is saved. (The presign key is
+    // just storage organisation; it needn't match the final item id.)
+    const targetId = editId ?? (pendingImgId.current ??= crypto.randomUUID());
 
     setUploading(true); setMsg('');
     try {
       // Compress client-side (max 1200px for product shots) before R2 upload
       const { blob, ext, contentType } = await compressImage(file, 1200);
-      const { data } = await getItemImagePresign(editId, ext);
+      const { data } = await getItemImagePresign(targetId, ext);
       await axios.put(data.uploadUrl, blob, {
         headers: { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=31536000' },
       });
       setForm(f => ({ ...f, imageUrl: data.publicUrl }));
-      setMsg('✅ Photo uploaded — click Update Product to save.');
+      setMsg(editId ? '✅ Photo uploaded — click Update Product to save.'
+                    : '✅ Photo added — it’ll be saved with the product.');
     } catch {
       setMsg('❌ Photo upload failed. Try again.');
     } finally {
@@ -83,7 +86,7 @@ export default function ProductsPage() {
           : [...prev.items, res.data];
         return { ...prev, items };
       });
-      setMsg(editId ? '✅ Product updated' : '✅ Product added — edit it to add a photo.');
+      setMsg(editId ? '✅ Product updated' : '✅ Product added');
       cancelEdit();
     } catch (err: any) {
       setMsg('❌ ' + (err.response?.data?.error || 'Failed to save'));
@@ -145,8 +148,8 @@ export default function ProductsPage() {
             />
           )}
 
-          {/* Photo upload — only when editing */}
-          {editId && (
+          {/* Photo upload — available on add and edit */}
+          {(
             <div style={styles.photoRow}>
               <div style={{ flex: 1 }}>
                 <label className="label">Product Photo</label>
@@ -199,12 +202,6 @@ export default function ProductsPage() {
                 <div style={{ fontSize: 11, color: '#bbb', marginTop: 4 }}>JPG, PNG or WebP · Max 5MB</div>
               </div>
             </div>
-          )}
-
-          {!editId && (
-            <p style={{ fontSize: 12, color: '#aaa', marginBottom: 16 }}>
-              💡 Save the product first, then edit it to add a photo.
-            </p>
           )}
 
           {/* Featured checkbox */}
