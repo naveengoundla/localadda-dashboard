@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getStores, approveStore, rejectStore, suspendStore, reinstateStore, type AdminStore } from '../../api/admin';
+import { getStores, approveStore, rejectStore, suspendStore, reinstateStore, setStoreLocation, type AdminStore } from '../../api/admin';
 
 const STATUS_TABS = [
   { label: 'Pending', status: 'PENDING', color: '#f59e0b', bg: '#fffbeb' },
@@ -140,6 +140,30 @@ function StoreCard({ store, tab, actionLoading, onAction }: {
   onAction: (id: string, action: 'approve' | 'reject' | 'suspend' | 'reinstate') => void;
 }) {
   const busy = (a: string) => actionLoading === store.id + a;
+  const [lat, setLat] = useState(store.latitude != null ? String(store.latitude) : '');
+  const [lng, setLng] = useState(store.longitude != null ? String(store.longitude) : '');
+  const [savingLoc, setSavingLoc] = useState(false);
+  const [locMsg, setLocMsg] = useState('');
+
+  async function saveLoc() {
+    setSavingLoc(true); setLocMsg('');
+    try {
+      await setStoreLocation(store.id, lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null);
+      setLocMsg('✅ Saved');
+    } catch { setLocMsg('❌ Failed'); }
+    finally { setSavingLoc(false); }
+  }
+  function useHere() {
+    if (!navigator.geolocation) { setLocMsg('No location support'); return; }
+    setLocMsg('📍 getting…');
+    navigator.geolocation.getCurrentPosition(
+      p => { setLat(p.coords.latitude.toFixed(6)); setLng(p.coords.longitude.toFixed(6)); setLocMsg('📍 captured — tap Save'); },
+      e => setLocMsg('❌ ' + e.message),
+      { enableHighAccuracy: true, timeout: 10000 });
+  }
+
+  const locInput: React.CSSProperties = { width: 92, padding: '6px 8px', borderRadius: 6, border: '1px solid #ddd', fontSize: 12 };
+  const miniBtn: React.CSSProperties = { padding: '6px 10px', borderRadius: 6, border: '1px solid #ddd', background: '#fff', fontSize: 12, cursor: 'pointer' };
 
   return (
     <div style={s.card}>
@@ -170,6 +194,22 @@ function StoreCard({ store, tab, actionLoading, onAction }: {
           View live page →
         </a>
       )}
+
+      {/* Location editor */}
+      <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #f0f0f0' }}>
+        <div style={{ fontSize: 11, color: '#888', marginBottom: 6 }}>
+          📍 Location {store.latitude != null ? '· set' : '· not set'}
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input style={locInput} value={lat} onChange={e => setLat(e.target.value)} placeholder="latitude" inputMode="decimal" />
+          <input style={locInput} value={lng} onChange={e => setLng(e.target.value)} placeholder="longitude" inputMode="decimal" />
+          <button type="button" style={miniBtn} onClick={useHere} title="Use my current location">📍 Here</button>
+          <button type="button" style={{ ...miniBtn, background: '#1a1a2e', color: '#fff', border: 'none' }} onClick={saveLoc} disabled={savingLoc}>
+            {savingLoc ? '…' : 'Save'}
+          </button>
+        </div>
+        {locMsg && <div style={{ fontSize: 11, marginTop: 5, color: locMsg.startsWith('✅') || locMsg.startsWith('📍') ? '#10b981' : '#ef4444' }}>{locMsg}</div>}
+      </div>
 
       {/* Action buttons */}
       <div style={s.actions}>

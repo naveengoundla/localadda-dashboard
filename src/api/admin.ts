@@ -28,7 +28,12 @@ export interface AdminStore {
   city: { slug: string; name: string; state: string };
   category: { slug: string; name: string; emoji: string };
   owner: { id: string; phone: string };
+  latitude?: number | null;
+  longitude?: number | null;
 }
+
+export const setStoreLocation = (id: string, latitude: number | null, longitude: number | null) =>
+  api.put<{ message: string }>(`/api/admin/stores/${id}/location`, { latitude, longitude });
 
 // Auth
 export const adminLogin = (email: string, password: string) =>
