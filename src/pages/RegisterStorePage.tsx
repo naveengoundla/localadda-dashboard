@@ -60,7 +60,8 @@ export default function RegisterStorePage() {
       await registerStore({ ...form, citySlug, categorySlug, termsAccepted: true });
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Registration failed. Please try again.');
+      const d = err?.response?.data;
+      setError(d?.error || d?.message || `Registration failed (${err?.response?.status ?? 'network'}). Please try again.`);
     } finally {
       setSubmitting(false);
     }
