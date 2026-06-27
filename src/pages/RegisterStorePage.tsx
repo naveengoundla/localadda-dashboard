@@ -11,6 +11,7 @@ export default function RegisterStorePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [agreed, setAgreed] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -44,10 +45,14 @@ export default function RegisterStorePage() {
       setError('Please fill in all required fields.');
       return;
     }
+    if (!agreed) {
+      setError('Please accept the Seller Terms to continue.');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
-      await registerStore(form);
+      await registerStore({ ...form, termsAccepted: true });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Registration failed. Please try again.');
@@ -157,13 +162,22 @@ export default function RegisterStorePage() {
           </div>
         </div>
 
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, margin: '4px 0 16px', fontSize: 13, lineHeight: 1.5, cursor: 'pointer' }}>
+          <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
+          <span>
+            I agree to the{' '}
+            <a href="https://localadda.com/seller-terms" target="_blank" rel="noreferrer" style={{ color: '#e8401c', fontWeight: 600 }}>Seller Terms</a>
+            {' '}and confirm I&apos;m responsible for my listings, prices, licenses, and orders.
+          </span>
+        </label>
+
         {error && <div style={styles.errorBox}>{error}</div>}
 
         <button
           type="submit"
           className="btn-primary"
-          disabled={submitting}
-          style={{ width: '100%', padding: '16px', fontSize: 16, fontWeight: 800 }}
+          disabled={submitting || !agreed}
+          style={{ width: '100%', padding: '16px', fontSize: 16, fontWeight: 800, opacity: agreed ? 1 : 0.6 }}
         >
           {submitting ? 'Registering…' : '🚀 Register My Store'}
         </button>
