@@ -14,6 +14,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminStoresPage from './pages/admin/AdminStoresPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import BannersPage from './pages/admin/BannersPage';
+import CitiesPage from './pages/admin/CitiesPage';
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const token = localStorage.getItem('token');
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="stores" element={<AdminStoresPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="banners" element={<BannersPage />} />
+          <Route path="cities" element={<CitiesPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

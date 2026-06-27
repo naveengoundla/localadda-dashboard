@@ -5,6 +5,7 @@ const NAV = [
   { to: '/admin/stores', label: 'All Stores', icon: '🏪' },
   { to: '/admin/categories', label: 'Category Fields', icon: '🧩' },
   { to: '/admin/banners', label: 'Banners', icon: '🖼️' },
+  { to: '/admin/cities', label: 'Cities', icon: '🏙️' },
 ];
 
 const STATUS_TABS = [

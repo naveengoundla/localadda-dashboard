@@ -77,6 +77,15 @@ export interface BannerPayload {
 export interface CityOption { id: string; slug: string; name: string; state: string }
 
 export const getCities = () => api.get<CityOption[]>('/api/cities');
+
+// ── Cities (admin rollout control) ────────────────────────────────
+export interface AdminCity { id: string; slug: string; name: string; state: string; published: boolean }
+export const getAdminCities = () => api.get<AdminCity[]>('/api/admin/cities');
+export const createCity = (c: { slug?: string; name: string; state?: string; published?: boolean }) =>
+  api.post<AdminCity>('/api/admin/cities', c);
+export const updateCity = (id: string, c: { name?: string; state?: string; published?: boolean }) =>
+  api.put<AdminCity>(`/api/admin/cities/${id}`, c);
+export const deleteCity = (id: string) => api.delete(`/api/admin/cities/${id}`);
 export const getAdminBanners = () => api.get<AdminBanner[]>('/api/admin/banners');
 export const createBanner = (b: BannerPayload) => api.post<AdminBanner>('/api/admin/banners', b);
 export const updateBanner = (id: string, b: BannerPayload) =>

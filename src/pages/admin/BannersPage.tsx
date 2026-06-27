@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import {
   getAdminBanners, createBanner, updateBanner, deleteBanner, getBannerPresign,
-  getCities, type AdminBanner, type CityOption,
+  getAdminCities, type AdminBanner, type AdminCity,
 } from '../../api/admin';
 import { compressImage } from '../../lib/compressImage';
 
@@ -20,7 +20,7 @@ const EMPTY: Form = {
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<AdminBanner[]>([]);
-  const [cities, setCities] = useState<CityOption[]>([]);
+  const [cities, setCities] = useState<AdminCity[]>([]);
   const [form, setForm] = useState<Form>(EMPTY);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -32,7 +32,7 @@ export default function BannersPage() {
     id ? (cities.find(c => c.id === id)?.name ?? 'Unknown') : 'All cities';
 
   async function load() {
-    const [b, c] = await Promise.all([getAdminBanners(), getCities()]);
+    const [b, c] = await Promise.all([getAdminBanners(), getAdminCities()]);
     setBanners(b.data);
     setCities(c.data);
   }
