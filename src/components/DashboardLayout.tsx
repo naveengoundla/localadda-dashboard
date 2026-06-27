@@ -12,9 +12,26 @@ function useInstallPrompt() {
       setInstalled(true);
       return;
     }
-    const handler = (e: Event) => { e.preventDefault(); setPrompt(e); };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    // Pick up an event already captured globally in main.tsx (fired before this
+    // component mounted), then keep listening for future ones.
+    const stashed = (window as unknown as { __deferredInstall?: Event }).__deferredInstall;
+    if (stashed) setPrompt(stashed);
+
+    const fromGlobal = () => {
+      const e = (window as unknown as { __deferredInstall?: Event }).__deferredInstall;
+      if (e) setPrompt(e);
+    };
+    const direct = (e: Event) => { e.preventDefault(); setPrompt(e); };
+    const onInstalled = () => { setInstalled(true); setPrompt(null); };
+
+    window.addEventListener('installavailable', fromGlobal);
+    window.addEventListener('beforeinstallprompt', direct);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('installavailable', fromGlobal);
+      window.removeEventListener('beforeinstallprompt', direct);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
   async function install() {
