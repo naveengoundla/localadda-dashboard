@@ -41,8 +41,13 @@ export default function RegisterStorePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.categorySlug || !form.citySlug || !form.phone || !form.address) {
-      setError('Please fill in all required fields.');
+    // Fall back to the first dropdown option if the controlled select never
+    // committed a value (it can display the first option while state stays '').
+    const citySlug = form.citySlug || cities[0]?.slug || '';
+    const categorySlug = form.categorySlug || categories[0]?.slug || '';
+
+    if (!form.name || !categorySlug || !citySlug || !form.phone || !form.address) {
+      setError('Please fill in all required fields (name, city, category, phone, address).');
       return;
     }
     if (!agreed) {
@@ -52,7 +57,7 @@ export default function RegisterStorePage() {
     setSubmitting(true);
     setError('');
     try {
-      await registerStore({ ...form, termsAccepted: true });
+      await registerStore({ ...form, citySlug, categorySlug, termsAccepted: true });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Registration failed. Please try again.');
