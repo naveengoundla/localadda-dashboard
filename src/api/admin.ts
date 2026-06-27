@@ -86,13 +86,18 @@ export interface CityOption { id: string; slug: string; name: string; state: str
 export const getCities = () => api.get<CityOption[]>('/api/cities');
 
 // ── Cities (admin rollout control) ────────────────────────────────
-export interface AdminCity { id: string; slug: string; name: string; state: string; published: boolean }
+export interface AdminCity {
+  id: string; slug: string; name: string; state: string; published: boolean;
+  emoji: string | null; imageUrl: string | null;
+}
 export const getAdminCities = () => api.get<AdminCity[]>('/api/admin/cities');
-export const createCity = (c: { slug?: string; name: string; state?: string; published?: boolean }) =>
+export const createCity = (c: { slug?: string; name: string; state?: string; published?: boolean; emoji?: string; imageUrl?: string }) =>
   api.post<AdminCity>('/api/admin/cities', c);
-export const updateCity = (id: string, c: { name?: string; state?: string; published?: boolean }) =>
+export const updateCity = (id: string, c: { name?: string; state?: string; published?: boolean; emoji?: string; imageUrl?: string }) =>
   api.put<AdminCity>(`/api/admin/cities/${id}`, c);
 export const deleteCity = (id: string) => api.delete(`/api/admin/cities/${id}`);
+export const getCityImagePresign = (ext: string) =>
+  api.get<{ uploadUrl: string; publicUrl: string; key: string }>(`/api/admin/cities/presign?ext=${ext}`);
 export const getAdminBanners = () => api.get<AdminBanner[]>('/api/admin/banners');
 export const createBanner = (b: BannerPayload) => api.post<AdminBanner>('/api/admin/banners', b);
 export const updateBanner = (id: string, b: BannerPayload) =>
