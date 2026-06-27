@@ -4,7 +4,7 @@ import { getMyStore, updateStore } from '../api/store';
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', phone: '', address: '', mapsUrl: '', description: '', latitude: '', longitude: '' });
+  const [form, setForm] = useState({ name: '', phone: '', address: '', mapsUrl: '', description: '', latitude: '', longitude: '', homeDelivery: false });
   const [hours, setHours] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -18,6 +18,7 @@ export default function ContactPage() {
         mapsUrl: s.mapsUrl || '', description: s.description || '',
         latitude: s.latitude != null ? String(s.latitude) : '',
         longitude: s.longitude != null ? String(s.longitude) : '',
+        homeDelivery: !!s.homeDelivery,
       });
       setHours(s.hours || {});
     });
@@ -110,6 +111,12 @@ export default function ContactPage() {
               Tip: stand inside your shop and tap “Use current location” for the most accurate pin.
             </div>
           </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.homeDelivery}
+              onChange={e => setForm(f => ({ ...f, homeDelivery: e.target.checked }))} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>🛵 Home delivery available</span>
+          </label>
         </div>
 
         <div className="card">

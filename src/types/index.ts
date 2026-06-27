@@ -58,6 +58,7 @@ export interface Store {
   mapsUrl: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  homeDelivery?: boolean;
   bannerUrl: string | null;
   galleryUrls: string[];
   hours: Record<string, string> | null;
