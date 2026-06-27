@@ -56,6 +56,8 @@ export interface AdminBanner {
   sortOrder: number;
   startAt: string | null;
   endAt: string | null;
+  layout: 'auto' | 'compact' | 'hero';
+  bgColor: string | null;
 }
 
 export interface BannerPayload {
@@ -68,6 +70,8 @@ export interface BannerPayload {
   sortOrder?: number;
   startAt?: string | null;
   endAt?: string | null;
+  layout?: 'auto' | 'compact' | 'hero';
+  bgColor?: string | null;
 }
 
 export interface CityOption { id: string; slug: string; name: string; state: string }

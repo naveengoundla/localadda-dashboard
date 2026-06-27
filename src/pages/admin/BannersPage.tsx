@@ -6,13 +6,16 @@ import {
 } from '../../api/admin';
 import { compressImage } from '../../lib/compressImage';
 
+type Layout = 'auto' | 'compact' | 'hero';
 type Form = {
   cityId: string; title: string; subtitle: string; imageUrl: string;
   linkUrl: string; active: boolean; sortOrder: string; startAt: string; endAt: string;
+  layout: Layout; bgColor: string;
 };
 const EMPTY: Form = {
   cityId: '', title: '', subtitle: '', imageUrl: '',
   linkUrl: '', active: true, sortOrder: '0', startAt: '', endAt: '',
+  layout: 'auto', bgColor: '#0f3460',
 };
 
 export default function BannersPage() {
@@ -47,6 +50,8 @@ export default function BannersPage() {
       sortOrder: String(b.sortOrder),
       startAt: b.startAt ? b.startAt.slice(0, 16) : '',
       endAt: b.endAt ? b.endAt.slice(0, 16) : '',
+      layout: b.layout ?? 'auto',
+      bgColor: b.bgColor ?? '#0f3460',
     });
   }
   function cancel() { setEditId(null); setForm(EMPTY); }
@@ -85,6 +90,8 @@ export default function BannersPage() {
       sortOrder: Number(form.sortOrder) || 0,
       startAt: form.startAt || null,
       endAt: form.endAt || null,
+      layout: form.layout,
+      bgColor: form.imageUrl ? null : form.bgColor, // colour only matters for text banners
     };
     try {
       if (editId) await updateBanner(editId, payload);
@@ -129,6 +136,23 @@ export default function BannersPage() {
             <input className="input" type="number" value={form.sortOrder}
               onChange={e => setForm(f => ({ ...f, sortOrder: e.target.value }))} />
           </div>
+          <div style={{ width: 150 }}>
+            <label className="label">Format</label>
+            <select className="input" value={form.layout}
+              onChange={e => setForm(f => ({ ...f, layout: e.target.value as Layout }))}>
+              <option value="auto">Auto</option>
+              <option value="compact">Compact strip</option>
+              <option value="hero">Tall hero</option>
+            </select>
+          </div>
+          {!form.imageUrl && (
+            <div style={{ width: 120 }}>
+              <label className="label">Background</label>
+              <input type="color" value={form.bgColor}
+                onChange={e => setForm(f => ({ ...f, bgColor: e.target.value }))}
+                style={{ width: '100%', height: 38, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }} />
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: 12 }}>
