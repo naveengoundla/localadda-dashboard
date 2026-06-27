@@ -6,6 +6,7 @@ const NAV = [
   { to: '/admin/categories', label: 'Category Fields', icon: '🧩' },
   { to: '/admin/banners', label: 'Banners', icon: '🖼️' },
   { to: '/admin/cities', label: 'Cities', icon: '🏙️' },
+  { to: '/admin/waitlist', label: 'Waitlist', icon: '🔔' },
 ];
 
 const STATUS_TABS = [

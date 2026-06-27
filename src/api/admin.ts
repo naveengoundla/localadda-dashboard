@@ -110,3 +110,10 @@ export const updateBanner = (id: string, b: BannerPayload) =>
 export const deleteBanner = (id: string) => api.delete(`/api/admin/banners/${id}`);
 export const getBannerPresign = (ext: string) =>
   api.get<{ uploadUrl: string; publicUrl: string; key: string }>(`/api/admin/banners/presign?ext=${ext}`);
+
+// ── Waitlist (demand capture) ─────────────────────────────────────
+export interface WaitlistEntry {
+  id: string; area: string | null; region: string | null;
+  contact: string; latitude: number | null; longitude: number | null; createdAt: string;
+}
+export const getAdminWaitlist = () => api.get<WaitlistEntry[]>('/api/admin/waitlist');

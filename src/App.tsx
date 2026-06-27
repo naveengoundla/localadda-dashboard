@@ -15,6 +15,7 @@ import AdminStoresPage from './pages/admin/AdminStoresPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import BannersPage from './pages/admin/BannersPage';
 import CitiesPage from './pages/admin/CitiesPage';
+import WaitlistPage from './pages/admin/WaitlistPage';
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const token = localStorage.getItem('token');
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="banners" element={<BannersPage />} />
           <Route path="cities" element={<CitiesPage />} />
+          <Route path="waitlist" element={<WaitlistPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
