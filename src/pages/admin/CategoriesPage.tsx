@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAdminCategories, updateCategorySchema, updateCategoryLayout, updateCategoryGrouping } from '../../api/admin';
+import { getAdminCategories, updateCategorySchema, updateCategoryLayout, updateCategoryGrouping, createCategory, updateCategory, deleteCategory } from '../../api/admin';
 import type { Category, CategoryField } from '../../types';
 import AttributeFields from '../../components/AttributeFields';
 
@@ -21,6 +21,8 @@ export default function CategoriesPage() {
   const [err, setErr] = useState('');
   const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState<Record<string, unknown>>({});
+  const [newName, setNewName] = useState('');
+  const [newEmoji, setNewEmoji] = useState('');
 
   useEffect(() => {
     getAdminCategories().then(r => {
@@ -28,6 +30,36 @@ export default function CategoriesPage() {
       if (r.data.length) select(r.data[0]);
     }).catch(() => setErr('Could not load categories.'));
   }, []);
+
+  async function reloadCats() {
+    const r = await getAdminCategories();
+    setCats(r.data);
+  }
+
+  async function addCategory(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newName.trim()) { setErr('Category name is required'); return; }
+    setErr(''); setMsg('');
+    try {
+      await createCategory({ name: newName.trim(), emoji: newEmoji.trim() || undefined });
+      setNewName(''); setNewEmoji('');
+      await reloadCats();
+      setMsg('✅ Category added');
+    } catch (e: any) { setErr(e.response?.data?.error || 'Could not add category'); }
+  }
+
+  async function toggleActive(c: Category) {
+    try {
+      await updateCategory(c.slug, { isActive: !(c.isActive ?? true) });
+      await reloadCats();
+    } catch (e: any) { setErr(e.response?.data?.error || 'Update failed'); }
+  }
+
+  async function removeCategory(c: Category) {
+    if (!confirm(`Delete ${c.name}? This can't be undone.`)) return;
+    try { await deleteCategory(c.slug); await reloadCats(); setMsg('✅ Deleted'); }
+    catch (e: any) { setErr(e.response?.data?.error || 'Delete failed'); }
+  }
 
   function select(c: Category) {
     setSlug(c.slug);
@@ -162,6 +194,37 @@ export default function CategoriesPage() {
 
       {err && <p style={{ color: '#e8401c', fontSize: 13, marginBottom: 12, fontWeight: 600 }}>⚠️ {err}</p>}
       {msg && <p style={{ color: '#1a7a35', fontSize: 13, marginBottom: 12, fontWeight: 600 }}>{msg}</p>}
+
+      {/* Manage categories — add / show-hide / delete */}
+      <div className="card" style={{ marginBottom: 18 }}>
+        <h3 style={{ fontWeight: 800, marginBottom: 4 }}>Manage categories</h3>
+        <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>
+          Hidden categories don’t appear on the public site. Delete is blocked while a category still has stores.
+        </p>
+        <form onSubmit={addCategory} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          <input className="input" style={{ width: 70 }} placeholder="🏪" value={newEmoji}
+            onChange={e => setNewEmoji(e.target.value)} />
+          <input className="input" style={{ flex: 1, minWidth: 160 }} placeholder="New category name (e.g. Bakery)"
+            value={newName} onChange={e => setNewName(e.target.value)} />
+          <button className="btn-primary" type="submit" style={{ fontSize: 13, padding: '8px 16px' }}>Add</button>
+        </form>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {cats.map(c => (
+            <div key={c.slug} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 4px', borderTop: '1px solid #f0f0f0' }}>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
+                {c.emoji} {c.name}{' '}
+                {(c.isActive ?? true)
+                  ? <span style={{ fontSize: 11, color: '#27ae60' }}>🟢 visible</span>
+                  : <span style={{ fontSize: 11, color: '#aaa' }}>⚪ hidden</span>}
+              </span>
+              <button className="btn-secondary" style={{ fontSize: 12.5, padding: '5px 11px' }} onClick={() => toggleActive(c)}>
+                {(c.isActive ?? true) ? 'Hide' : 'Show'}
+              </button>
+              <button onClick={() => removeCategory(c)} style={{ border: 'none', background: 'transparent', color: '#e8401c', cursor: 'pointer', fontSize: 16 }}>🗑️</button>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Layout mode */}
       <div className="card" style={{ marginBottom: 16 }}>

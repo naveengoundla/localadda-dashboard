@@ -10,6 +10,13 @@ export const updateCategoryLayout = (slug: string, layout: string) =>
 export const updateCategoryGrouping = (slug: string, groupBy: string) =>
   api.put<Category>(`/api/admin/categories/${slug}/grouping`, { groupBy });
 
+// Add / show-hide / delete categories
+export const createCategory = (c: { slug?: string; name: string; emoji?: string; gradient?: string; sortOrder?: number }) =>
+  api.post<Category>('/api/admin/categories', c);
+export const updateCategory = (slug: string, c: { name?: string; emoji?: string; gradient?: string; sortOrder?: number; isActive?: boolean }) =>
+  api.put<Category>(`/api/admin/categories/${slug}`, c);
+export const deleteCategory = (slug: string) => api.delete(`/api/admin/categories/${slug}`);
+
 export interface AdminStore {
   id: string;
   name: string;

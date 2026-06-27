@@ -20,6 +20,8 @@ export interface Category {
   itemSchema?: CategoryField[];
   layout?: 'list' | 'grid' | 'menu';
   groupBy?: string | null;
+  isActive?: boolean;
+  sortOrder?: number;
 }
 
 export interface StoreItem {
