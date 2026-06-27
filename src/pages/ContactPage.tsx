@@ -4,24 +4,53 @@ import { getMyStore, updateStore } from '../api/store';
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', phone: '', address: '', mapsUrl: '', description: '' });
+  const [form, setForm] = useState({ name: '', phone: '', address: '', mapsUrl: '', description: '', latitude: '', longitude: '' });
   const [hours, setHours] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
     getMyStore().then(r => {
       const s = r.data;
-      setForm({ name: s.name || '', phone: s.phone || '', address: s.address || '', mapsUrl: s.mapsUrl || '', description: s.description || '' });
+      setForm({
+        name: s.name || '', phone: s.phone || '', address: s.address || '',
+        mapsUrl: s.mapsUrl || '', description: s.description || '',
+        latitude: s.latitude != null ? String(s.latitude) : '',
+        longitude: s.longitude != null ? String(s.longitude) : '',
+      });
       setHours(s.hours || {});
     });
   }, []);
+
+  function useMyLocation() {
+    if (!navigator.geolocation) { setMsg('❌ Location not supported on this device'); return; }
+    setLocating(true); setMsg('📍 Getting your location…');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setForm(f => ({
+          ...f,
+          latitude: pos.coords.latitude.toFixed(6),
+          longitude: pos.coords.longitude.toFixed(6),
+        }));
+        setLocating(false);
+        setMsg('✅ Location captured — tap Save to apply');
+      },
+      err => { setLocating(false); setMsg('❌ Could not get location: ' + err.message); },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true); setMsg('');
     try {
-      await updateStore({ ...form, hours });
+      await updateStore({
+        ...form,
+        latitude: form.latitude ? parseFloat(form.latitude) : null,
+        longitude: form.longitude ? parseFloat(form.longitude) : null,
+        hours,
+      });
       setMsg('✅ Contact details saved! Store page updating…');
     } catch (err: any) {
       setMsg('❌ ' + (err.response?.data?.error || 'Failed to save'));
@@ -56,9 +85,30 @@ export default function ContactPage() {
               <input className="input" placeholder="https://maps.google.com/..." value={form.mapsUrl} onChange={e => setForm(f => ({ ...f, mapsUrl: e.target.value }))} />
             </div>
           </div>
-          <div>
+          <div style={{ marginBottom: 14 }}>
             <label className="label">Address</label>
             <textarea className="input" rows={2} style={{ resize: 'none' }} value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Shop No., Street, Area, City - PIN" />
+          </div>
+
+          {/* Shop location — powers "near me" sorting for customers */}
+          <div>
+            <label className="label">Shop location (for “near me”)</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+              <button type="button" className="btn-secondary" style={{ fontSize: 13, padding: '8px 14px' }}
+                onClick={useMyLocation} disabled={locating}>
+                {locating ? '📍 Getting…' : '📍 Use current location'}
+              </button>
+              <span style={{ fontSize: 12, color: '#aaa' }}>— or enter manually below</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <input className="input" placeholder="Latitude (e.g. 17.337)" value={form.latitude}
+                onChange={e => setForm(f => ({ ...f, latitude: e.target.value }))} inputMode="decimal" />
+              <input className="input" placeholder="Longitude (e.g. 77.904)" value={form.longitude}
+                onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} inputMode="decimal" />
+            </div>
+            <div style={{ fontSize: 11.5, color: '#bbb', marginTop: 5 }}>
+              Tip: stand inside your shop and tap “Use current location” for the most accurate pin.
+            </div>
           </div>
         </div>
 

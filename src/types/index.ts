@@ -56,6 +56,8 @@ export interface Store {
   phone: string | null;
   address: string | null;
   mapsUrl: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   bannerUrl: string | null;
   galleryUrls: string[];
   hours: Record<string, string> | null;
