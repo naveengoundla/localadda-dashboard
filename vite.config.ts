@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'LocalAdda Store Owner',
         short_name: 'LocalAdda',
@@ -23,14 +23,16 @@ export default defineConfig({
             src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: '/icon-512.png',
+            src: '/icon-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -42,7 +44,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             // Cache API responses for 5 minutes (network first)
-            urlPattern: /^https:\/\/localadda-backend.*\/api\//,
+            urlPattern: /^https:\/\/api\.localadda\.com\/api\//,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -54,8 +56,8 @@ export default defineConfig({
             },
           },
           {
-            // Cache R2 images for 1 year
-            urlPattern: /^https:\/\/pub-.*\.r2\.dev\//,
+            // Cache R2 images for 1 year (assets domain + legacy r2.dev)
+            urlPattern: /^https:\/\/(assets\.localadda\.com|pub-.*\.r2\.dev)\//,
             handler: 'CacheFirst',
             options: {
               cacheName: 'image-cache',
