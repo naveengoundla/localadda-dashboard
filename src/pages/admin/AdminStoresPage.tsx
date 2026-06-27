@@ -14,6 +14,8 @@ export default function AdminStoresPage() {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [cityFilter, setCityFilter] = useState('');
+  const [catFilter, setCatFilter] = useState('');
 
   useEffect(() => { load(); }, [activeTab]);
 
@@ -52,12 +54,22 @@ export default function AdminStoresPage() {
 
   const tab = STATUS_TABS.find(t => t.status === activeTab)!;
 
+  // Filter options derived from the loaded stores (current status tab)
+  const cityOpts = Array.from(new Map(stores.map(s => [s.city.slug, s.city.name])).entries())
+    .sort((a, b) => a[1].localeCompare(b[1]));
+  const catOpts = Array.from(new Map(stores.map(s => [s.category.slug, s.category.name])).entries())
+    .sort((a, b) => a[1].localeCompare(b[1]));
+
+  const filtered = stores.filter(s =>
+    (!cityFilter || s.city.slug === cityFilter) &&
+    (!catFilter || s.category.slug === catFilter));
+
   return (
     <div>
       {/* Header */}
       <div style={s.header}>
         <h1 style={s.title}>Store Moderation</h1>
-        <span style={s.count}>{stores.length} store{stores.length !== 1 ? 's' : ''}</span>
+        <span style={s.count}>{filtered.length} store{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Status tabs */}
@@ -77,14 +89,29 @@ export default function AdminStoresPage() {
         ))}
       </div>
 
+      {/* City / Category filters */}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '14px 0' }}>
+        <select value={cityFilter} onChange={e => setCityFilter(e.target.value)} style={s.filterSelect}>
+          <option value="">All cities</option>
+          {cityOpts.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}
+        </select>
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={s.filterSelect}>
+          <option value="">All categories</option>
+          {catOpts.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}
+        </select>
+        {(cityFilter || catFilter) && (
+          <button onClick={() => { setCityFilter(''); setCatFilter(''); }} style={s.filterClear}>Clear</button>
+        )}
+      </div>
+
       {/* Content */}
       {loading ? (
         <div style={s.empty}>Loading…</div>
-      ) : stores.length === 0 ? (
-        <div style={s.empty}>No {activeTab.toLowerCase()} stores</div>
+      ) : filtered.length === 0 ? (
+        <div style={s.empty}>No {activeTab.toLowerCase()} stores{(cityFilter || catFilter) ? ' match the filters' : ''}</div>
       ) : (
         <div style={s.grid}>
-          {stores.map(store => (
+          {filtered.map(store => (
             <StoreCard
               key={store.id}
               store={store}
@@ -199,5 +226,7 @@ const s: Record<string, React.CSSProperties> = {
   link: { display: 'block', fontSize: 12, color: '#e8401c', textDecoration: 'none', marginBottom: 12 },
   actions: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   empty: { textAlign: 'center', color: '#aaa', padding: '60px 0', fontSize: 15 },
+  filterSelect: { padding: '8px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 13, background: '#fff', cursor: 'pointer' },
+  filterClear: { padding: '8px 12px', borderRadius: 8, border: 'none', background: 'transparent', color: '#e8401c', fontSize: 13, cursor: 'pointer', fontWeight: 600 },
   toast: { position: 'fixed', bottom: 28, right: 28, color: '#fff', borderRadius: 10, padding: '12px 20px', fontSize: 14, fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 9999 },
 };
