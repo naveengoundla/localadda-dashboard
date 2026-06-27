@@ -172,7 +172,7 @@ export default function RegisterStorePage() {
           <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
           <span>
             I agree to the{' '}
-            <a href="https://localadda.com/seller-terms" target="_blank" rel="noreferrer" style={{ color: '#e8401c', fontWeight: 600 }}>Seller Terms</a>
+            <a href="https://localadda.com/seller-terms" style={{ color: '#e8401c', fontWeight: 600 }}>Seller Terms</a>
             {' '}and confirm I&apos;m responsible for my listings, prices, licenses, and orders.
           </span>
         </label>
