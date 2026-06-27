@@ -4,6 +4,7 @@ import api from '../../api/client';
 const NAV = [
   { to: '/admin/stores', label: 'All Stores', icon: '🏪' },
   { to: '/admin/categories', label: 'Category Fields', icon: '🧩' },
+  { to: '/admin/banners', label: 'Banners', icon: '🖼️' },
 ];
 
 const STATUS_TABS = [

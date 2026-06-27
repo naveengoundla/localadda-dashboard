@@ -43,3 +43,40 @@ export const suspendStore = (id: string) =>
 
 export const reinstateStore = (id: string) =>
   api.post<{ message: string }>(`/api/admin/stores/${id}/reinstate`);
+
+// ── Homepage banners ──────────────────────────────────────────────
+export interface AdminBanner {
+  id: string;
+  cityId: string | null;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  active: boolean;
+  sortOrder: number;
+  startAt: string | null;
+  endAt: string | null;
+}
+
+export interface BannerPayload {
+  cityId?: string | null;
+  title: string;
+  subtitle?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  active?: boolean;
+  sortOrder?: number;
+  startAt?: string | null;
+  endAt?: string | null;
+}
+
+export interface CityOption { id: string; slug: string; name: string; state: string }
+
+export const getCities = () => api.get<CityOption[]>('/api/cities');
+export const getAdminBanners = () => api.get<AdminBanner[]>('/api/admin/banners');
+export const createBanner = (b: BannerPayload) => api.post<AdminBanner>('/api/admin/banners', b);
+export const updateBanner = (id: string, b: BannerPayload) =>
+  api.put<AdminBanner>(`/api/admin/banners/${id}`, b);
+export const deleteBanner = (id: string) => api.delete(`/api/admin/banners/${id}`);
+export const getBannerPresign = (ext: string) =>
+  api.get<{ uploadUrl: string; publicUrl: string; key: string }>(`/api/admin/banners/presign?ext=${ext}`);
