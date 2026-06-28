@@ -56,6 +56,9 @@ export const suspendStore = (id: string) =>
 export const reinstateStore = (id: string) =>
   api.post<{ message: string }>(`/api/admin/stores/${id}/reinstate`);
 
+export const deleteStore = (id: string) =>
+  api.delete<{ deleted: boolean; slug: string }>(`/api/admin/stores/${id}`);
+
 // ── Homepage banners ──────────────────────────────────────────────
 export interface AdminBanner {
   id: string;

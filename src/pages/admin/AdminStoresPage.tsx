@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getStores, approveStore, rejectStore, suspendStore, reinstateStore, setStoreLocation, type AdminStore } from '../../api/admin';
+import { getStores, approveStore, rejectStore, suspendStore, reinstateStore, setStoreLocation, deleteStore, type AdminStore } from '../../api/admin';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 const STATUS_TABS = [
   { label: 'Pending', status: 'PENDING', color: '#f59e0b', bg: '#fffbeb' },
@@ -16,6 +17,7 @@ export default function AdminStoresPage() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [cityFilter, setCityFilter] = useState('');
   const [catFilter, setCatFilter] = useState('');
+  const [confirmDel, setConfirmDel] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => { load(); }, [activeTab]);
 
@@ -47,6 +49,21 @@ export default function AdminStoresPage() {
       load(); // refresh list
     } catch (err: any) {
       showToast(err.response?.data?.error || `Failed to ${action} store`, false);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function performDelete() {
+    if (!confirmDel) return;
+    setActionLoading(confirmDel.id + 'delete');
+    try {
+      await deleteStore(confirmDel.id);
+      showToast('Store deleted', true);
+      setConfirmDel(null);
+      load();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to delete store', false);
     } finally {
       setActionLoading(null);
     }
@@ -118,6 +135,7 @@ export default function AdminStoresPage() {
               tab={tab}
               actionLoading={actionLoading}
               onAction={doAction}
+              onDelete={(id, name) => setConfirmDel({ id, name })}
             />
           ))}
         </div>
@@ -129,15 +147,26 @@ export default function AdminStoresPage() {
           {toast.ok ? '✓' : '✕'} {toast.msg}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDel}
+        title="Delete this store?"
+        message={`Permanently delete "${confirmDel?.name ?? ''}"? This removes the store and its products, photos and invites. This cannot be undone.`}
+        confirmLabel="Delete store"
+        busy={actionLoading === (confirmDel?.id ?? '') + 'delete'}
+        onConfirm={performDelete}
+        onCancel={() => setConfirmDel(null)}
+      />
     </div>
   );
 }
 
-function StoreCard({ store, tab, actionLoading, onAction }: {
+function StoreCard({ store, tab, actionLoading, onAction, onDelete }: {
   store: AdminStore;
   tab: typeof STATUS_TABS[0];
   actionLoading: string | null;
   onAction: (id: string, action: 'approve' | 'reject' | 'suspend' | 'reinstate') => void;
+  onDelete: (id: string, name: string) => void;
 }) {
   const busy = (a: string) => actionLoading === store.id + a;
   const [lat, setLat] = useState(store.latitude != null ? String(store.latitude) : '');
@@ -225,6 +254,14 @@ function StoreCard({ store, tab, actionLoading, onAction }: {
         {(store.status === 'SUSPENDED' || store.status === 'REJECTED') && (
           <ActionBtn label="Reinstate" color="#10b981" busy={busy('reinstate')} onClick={() => onAction(store.id, 'reinstate')} />
         )}
+        <button
+          type="button"
+          onClick={() => onDelete(store.id, store.name)}
+          disabled={busy('delete')}
+          style={{ marginLeft: 'auto', padding: '8px 12px', borderRadius: 8, border: '1px solid #f3c2bd', background: '#fff5f4', color: '#c0322b', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+        >
+          🗑️ Delete
+        </button>
       </div>
     </div>
   );
